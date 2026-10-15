@@ -77,7 +77,11 @@ $('loginBtn').onclick=async()=>{
   $('loginMessage').textContent='Anmeldung läuft …'; $('loginBtn').disabled=true;
   try { const {data:authData,error}=await supabaseClient.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value}); if(error) throw error;
     const {data:row,error:readError}=await supabaseClient.from('streamplan').select('owner_id').eq('id',1).single(); if(readError) throw readError;
-    if(!authData.user || authData.user.id!==row.owner_id){ await supabaseClient.auth.signOut(); throw new Error('Dieses Konto ist nicht als Streamplan-Admin freigeschaltet.'); }
+    const allowedAdmins = [
+  row.owner_id,
+  '6dcf19be-0dc0-4c7d-8749-1b193eb866e1'
+];
+if(!authData.user || !allowedAdmins.includes(authData.user.id)){ await supabaseClient.auth.signOut(); throw new Error('Dieses Konto ist nicht als Streamplan-Admin freigeschaltet.'); }
     setAdminUI(true); $('loginPanel').style.display='none'; $('loginMessage').textContent=''; $('loginPassword').value=''; $('editor').classList.add('open'); fill(); syncMetaInputs();
   } catch(err){ $('loginMessage').textContent='Anmeldung fehlgeschlagen: '+(err.message||'Bitte Zugangsdaten prüfen.'); }
   finally { $('loginBtn').disabled=false; }
