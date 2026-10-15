@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Streamplan</title>
+<style>
+:root{--bg:#090b18;--panel:#151a31;--panel2:#202642;--line:#3e4475;--purple:#a996ff;--text:#f5f5ff;--muted:#a9afce;--yellow:#facc15}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% 0%,#24224f 0,transparent 42%),var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--text)}
+.container{max-width:1120px;margin:auto;padding:34px 24px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:64px}.brand{font-size:13px;font-weight:900;letter-spacing:2px;color:#c2b5ff}.pill{border:1px solid #3d426c;border-radius:999px;padding:9px 14px;font-size:11px;color:#c5c9e8;letter-spacing:.5px;background:#ffffff08}
+h1{font-size:clamp(38px,7vw,76px);letter-spacing:-3px;line-height:1.03;margin:0 0 17px;font-weight:900}.desc{max-width:650px;color:var(--muted);font-size:16px;line-height:1.5;margin:0 0 24px}.buttons{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-block;text-decoration:none;border:1px solid #42476e;background:#222741;color:#f8f7ff;padding:12px 17px;border-radius:11px;font-weight:800;font-size:13px;cursor:pointer}.btn.primary{background:var(--purple);border-color:var(--purple);color:#15102d}.btn:hover{filter:brightness(1.1)}
+h2{font-size:22px;margin:44px 0 17px;letter-spacing:-.5px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.day{background:linear-gradient(150deg,#171b33,#13172a);border:1px solid var(--line);border-radius:17px;padding:19px;min-height:175px;box-shadow:0 12px 32px #0002}.day.active{border-color:#7669d9;box-shadow:0 0 0 1px #7669d944}.dayname{font-size:12px;letter-spacing:1.5px;color:#b5a9ff;font-weight:900;margin-bottom:19px}.time{font-size:24px;font-weight:900;letter-spacing:-.6px;margin-bottom:8px}.game{font-size:13px;color:#b8bfdc;margin-bottom:13px}.status{display:inline-block;background:#29254c;color:#bfb3ff;font-size:10px;font-weight:900;letter-spacing:.7px;padding:5px 8px;border-radius:6px}.status.off{background:#24283a;color:#9da4c4}.cover{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;margin-bottom:12px;border:1px solid #383d64}.editor{display:none;margin-top:24px;background:#13172a;border:1px solid #41466d;border-radius:16px;padding:20px}.editor.open{display:block}.editor h3{margin:0 0 15px}.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:#c6c8e5;font-weight:750}.field input,.field select{background:#090d1c;border:1px solid #3c4268;border-radius:8px;padding:10px;color:white;font:inherit;font-size:13px;min-width:0}.field input[type=file]{font-size:11px}.edit-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.help{font-size:12px;line-height:1.5;color:var(--muted)}.footer{border-top:1px solid #272c4b;margin-top:45px;padding-top:18px;color:#7f86a9;font-size:12px}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top{margin-bottom:44px}h1{letter-spacing:-1.7px}}@media(max-width:480px){.container{padding:24px 15px 40px}.grid{grid-template-columns:1fr}.fields{grid-template-columns:1fr 1fr}.day{min-height:145px}.time{font-size:22px}}@media(max-width:350px){.fields{grid-template-columns:1fr}}
+</style></head><body><main class="container">
+<div class="top"><div class="brand">⚡ STREAM HQ</div><div class="pill">🎮 GAMING · COMMUNITY · LIVE</div></div>
+<section><h1 id="mainTitle">Streamplan<br>Diese Woche</h1><p class="desc" id="description">Hier siehst du, wann wir gemeinsam zocken, lachen und neue Abenteuer erleben. Sei beim nächsten Stream dabei!</p><div class="buttons"><a class="btn primary" id="twitchLink" href="https://twitch.tv/" target="_blank" rel="noopener">↗ Zum Twitch-Kanal</a><button class="btn" id="editToggle">🔒 Admin-Login</button><button class="btn" id="logoutBtn" style="display:none">Abmelden</button></div></section>
+<section class="editor" id="loginPanel" style="display:none"><h3>🔐 Admin-Login</h3><p class="help">Melde dich mit dem Admin-E-Mail-Konto und deinem Supabase-Passwort an.</p><div class="fields"><div class="field"><label>E-Mail</label><input id="loginEmail" type="email" autocomplete="username" placeholder="deine@email.de"></div><div class="field"><label>Passwort</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Passwort"></div></div><div class="edit-actions"><button class="btn primary" id="loginBtn">Anmelden</button><button class="btn" id="cancelLogin">Abbrechen</button></div><p class="help" id="loginMessage" role="status"></p></section>
+<h2>🗓️ Wochenübersicht</h2><section class="grid" id="schedule"></section>
+<section class="editor" id="editor"><h3>Streamplan bearbeiten</h3><div class="fields">
+<div class="field"><label>Seitentitel</label><input id="titleInput" value="Streamplan"></div><div class="field"><label>Zeitraum (z. B. 12.10.26–18.10.26)</label><input id="rangeInput" value="Diese Woche"></div><div class="field"><label>Beschreibung</label><input id="descInput" value="Hier siehst du, wann wir gemeinsam zocken, lachen und neue Abenteuer erleben. Sei beim nächsten Stream dabei!"></div>
+<div class="field"><label>Twitch-Kanal-Link</label><input id="twitchInput" value="https://twitch.tv/"></div><div class="field"><label>Tag auswählen</label><select id="daySelect"></select></div><div class="field"><label>Uhrzeit</label><input id="timeInput" placeholder="19:30 Uhr"></div><div class="field"><label>Spiel / Aktivität</label><input id="gameInput" placeholder="RDR2 RP"></div><div class="field"><label>Status</label><select id="statusInput"><option>STREAM</option><option>OFFLINE</option><option>STREAMFREI</option><option>GEPLANT</option></select></div><div class="field"><label>Zusatzinfo (optional)</label><input id="noteInput" placeholder="Zeit zum Aufladen 🔋"></div><div class="field"><label>Spielbild (optional)</label><input id="imageInput" type="file" accept="image/*"></div></div>
+<p class="help">Wähle einen Tag, bearbeite Uhrzeit und Spiel und lade bei Bedarf ein Cover hoch. Angemeldete Admins speichern Änderungen zentral, sodass sie für alle Besucher sichtbar werden.</p>
+<div class="edit-actions"><button class="btn primary" id="saveDay">Tag speichern</button><button class="btn" id="clearDay">Tag leeren</button><button class="btn" id="saveMeta">Kopfbereich speichern</button><button class="btn" id="download">Aktuelle Seite herunterladen</button></div></section>
+<div class="footer">STREAM HQ · Wochenplan für die Community</div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Nach der Supabase-Einrichtung diese beiden Werte aus Project Settings → API eintragen.
+const SUPABASE_URL = 'https://xvyplbgromwsoxzauqrr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_8O5Yi9MD35YI2trl2_ar0Q_9rob2TJQ';
+const supabaseConfigured = SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('HIER_') && !SUPABASE_ANON_KEY.includes('HIER_');
+const supabaseClient = supabaseConfigured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const names=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+const initial={title:'Streamplan',range:'Diese Woche',description:'Hier siehst du, wann wir gemeinsam zocken, lachen und neue Abenteuer erleben. Sei beim nächsten Stream dabei!',twitch:'https://twitch.tv/',days:names.map((day,i)=>({day,time:i<3?'19:30 Uhr':'',game:i<2?'RDR2 RP':i===2?'Gaming & Community':i===3?'Zeit zum Aufladen 🔋':'',status:i<3?'STREAM':i===3?'STREAMFREI':'OFFLINE',note:'',image:''}))};
+let data=JSON.parse(JSON.stringify(initial));
+const $=id=>document.getElementById(id);
+let adminSession = false;
+let saving = false;
+async function loadPlan(){
+  if(!supabaseClient){ render(); $('loginMessage') && ($('loginMessage').textContent=''); return; }
+  try {
+    const {data:row,error}=await supabaseClient.from('streamplan').select('data').eq('id',1).maybeSingle();
+    if(error) throw error;
+    if(row && row.data){ data={...initial,...row.data}; }
+    else { console.warn('Noch kein Streamplan-Datensatz in Supabase vorhanden.'); }
+    render(); syncMetaInputs();
+  } catch(err) { console.error(err); render(); }
+}
+async function save(){
+  if(!supabaseClient){ alert('Supabase ist noch nicht eingerichtet. Bitte zuerst die Projekt-URL und den Publishable/anon-Key eintragen.'); return false; }
+  if(!adminSession){ alert('Bitte zuerst mit dem Admin-Konto anmelden.'); return false; }
+  if(saving) return false;
+  saving=true;
+  try {
+    const {data:sessionData}=await supabaseClient.auth.getSession();
+    if(!sessionData.session) throw new Error('Deine Anmeldung ist abgelaufen. Bitte erneut anmelden.');
+    const {error}=await supabaseClient.from('streamplan').update({data:data,updated_at:new Date().toISOString()}).eq('id',1);
+    if(error) throw error;
+    return true;
+  } catch(err) { alert('Speichern fehlgeschlagen: '+(err.message||'Unbekannter Fehler')); return false; }
+  finally { saving=false; }
+}
+function syncMetaInputs(){ $('titleInput').value=data.title||''; $('rangeInput').value=data.range||''; $('descInput').value=data.description||''; $('twitchInput').value=data.twitch||''; }
+function setAdminUI(isAdmin){
+  adminSession=isAdmin;
+  $('logoutBtn').style.display=isAdmin?'inline-block':'none';
+  $('editToggle').textContent=isAdmin?'🔓 Bearbeitung schließen':'🔒 Admin-Login';
+  if(!isAdmin){ $('editor').classList.remove('open'); }
+}
+async function saveAndRender(){ const ok=await save(); if(ok) render(); return ok; }
+function render(){ $('mainTitle').innerHTML=(data.title||'Streamplan')+'<br>'+(data.range||'Diese Woche');$('description').textContent=data.description||'';$('twitchLink').href=data.twitch||'https://twitch.tv/';$('schedule').innerHTML='';
+data.days.forEach((d,i)=>{const c=document.createElement('article');c.className='day'+(d.status==='STREAM'?' active':'');const n=document.createElement('div');n.className='dayname';n.textContent=d.day.toUpperCase();c.appendChild(n);if(d.image){const im=document.createElement('img');im.className='cover';im.src=d.image;im.alt=d.game||'Spielcover';c.appendChild(im)}const t=document.createElement('div');t.className='time';t.textContent=d.time||'—';c.appendChild(t);const g=document.createElement('div');g.className='game';g.textContent=d.game||'Noch kein Stream geplant';c.appendChild(g);const s=document.createElement('span');s.className='status'+(d.status==='OFFLINE'||d.status==='STREAMFREI'?' off':'');s.textContent=d.status||'GEPLANT';c.appendChild(s);if(d.note){const note=document.createElement('div');note.className='game';note.style.marginTop='12px';note.textContent=d.note;c.appendChild(note)}$('schedule').appendChild(c)})}
+names.forEach((n,i)=>{let o=document.createElement('option');o.value=i;o.textContent=n;$('daySelect').appendChild(o)});
+function fill(){let d=data.days[+$('daySelect').value];$('timeInput').value=d.time||'';$('gameInput').value=d.game||'';$('statusInput').value=d.status||'GEPLANT';$('noteInput').value=d.note||'';$('imageInput').value=''}
+$('editToggle').onclick=()=>{
+  if(!supabaseConfigured){ $('loginPanel').style.display='block'; $('loginMessage').textContent='Supabase ist noch nicht verbunden. Folge zuerst der Einrichtung und trage anschließend Projekt-URL und Publishable/anon-Key in die HTML-Datei ein.'; return; }
+  if(adminSession){ $('editor').classList.toggle('open'); if($('editor').classList.contains('open')){fill();syncMetaInputs();} }
+  else { $('loginPanel').style.display=$('loginPanel').style.display==='block'?'none':'block'; }
+};
+$('cancelLogin').onclick=()=>{ $('loginPanel').style.display='none'; $('loginMessage').textContent=''; };
+$('loginBtn').onclick=async()=>{
+  $('loginMessage').textContent='Anmeldung läuft …'; $('loginBtn').disabled=true;
+  try { const {data:authData,error}=await supabaseClient.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value}); if(error) throw error;
+    const {data:row,error:readError}=await supabaseClient.from('streamplan').select('owner_id').eq('id',1).single(); if(readError) throw readError;
+    if(!authData.user || authData.user.id!==row.owner_id){ await supabaseClient.auth.signOut(); throw new Error('Dieses Konto ist nicht als Streamplan-Admin freigeschaltet.'); }
+    setAdminUI(true); $('loginPanel').style.display='none'; $('loginMessage').textContent=''; $('loginPassword').value=''; $('editor').classList.add('open'); fill(); syncMetaInputs();
+  } catch(err){ $('loginMessage').textContent='Anmeldung fehlgeschlagen: '+(err.message||'Bitte Zugangsdaten prüfen.'); }
+  finally { $('loginBtn').disabled=false; }
+};
+$('logoutBtn').onclick=async()=>{if(supabaseClient) await supabaseClient.auth.signOut();setAdminUI(false);$('loginPanel').style.display='none';};
+$('daySelect').onchange=fill;
+$('saveDay').onclick=async()=>{let d=data.days[+$('daySelect').value];d.time=$('timeInput').value.trim();d.game=$('gameInput').value.trim();d.status=$('statusInput').value;d.note=$('noteInput').value.trim();let f=$('imageInput').files[0];if(f){if(f.size>1200000){alert('Das Bild ist größer als 1,2 MB. Bitte ein kleineres Bild verwenden.');return;}let r=new FileReader();r.onload=async()=>{d.image=r.result;await saveAndRender()};r.readAsDataURL(f)}else{await saveAndRender()}};
+$('clearDay').onclick=async()=>{let i=+$('daySelect').value;data.days[i]={day:names[i],time:'',game:'',status:'OFFLINE',note:'',image:''};if(await saveAndRender()) fill()};
+$('saveMeta').onclick=async()=>{data.title=$('titleInput').value.trim()||'Streamplan';data.range=$('rangeInput').value.trim();data.description=$('descInput').value.trim();data.twitch=$('twitchInput').value.trim()||'https://twitch.tv/';await saveAndRender()};
+function standalone(){let c=document.documentElement.cloneNode(true);c.querySelector('#editor').classList.remove('open');c.querySelector('#editToggle').style.display='none';c.querySelector('#twitchLink').href=data.twitch; c.querySelector('script').textContent=`const data=${JSON.stringify(data)};const $=id=>document.getElementById(id);$('mainTitle').innerHTML=(data.title||'Streamplan')+'<br>'+(data.range||'Diese Woche');$('description').textContent=data.description||'';$('twitchLink').href=data.twitch;$('schedule').innerHTML='';data.days.forEach((d,i)=>{const c=document.createElement('article');c.className='day'+(d.status==='STREAM'?' active':'');const n=document.createElement('div');n.className='dayname';n.textContent=d.day.toUpperCase();c.appendChild(n);if(d.image){const im=document.createElement('img');im.className='cover';im.src=d.image;im.alt=d.game||'Spielcover';c.appendChild(im)}const t=document.createElement('div');t.className='time';t.textContent=d.time||'—';c.appendChild(t);const g=document.createElement('div');g.className='game';g.textContent=d.game||'Noch kein Stream geplant';c.appendChild(g);const s=document.createElement('span');s.className='status'+(d.status==='OFFLINE'||d.status==='STREAMFREI'?' off':'');s.textContent=d.status||'GEPLANT';c.appendChild(s);if(d.note){const no=document.createElement('div');no.className='game';no.style.marginTop='12px';no.textContent=d.note;c.appendChild(no)}$('schedule').appendChild(c)});`;return '<!doctype html>\\n'+c.outerHTML}
+$('download').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([standalone()],{type:'text/html;charset=utf-8'}));a.download='streamplan.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+syncMetaInputs();render();
+if(supabaseClient){ loadPlan(); supabaseClient.auth.getSession().then(({data})=>{ if(data.session){ supabaseClient.from('streamplan').select('owner_id').eq('id',1).single().then(({data:row})=>{if(row && row.owner_id===data.session.user.id)setAdminUI(true);}); } }); }
+</script></body></html>
