@@ -51,6 +51,15 @@ async function save(){
     if(!sessionData.session) throw new Error('Deine Anmeldung ist abgelaufen. Bitte erneut anmelden.');
     const {error}=await supabaseClient.from('streamplan').update({data:data,updated_at:new Date().toISOString()}).eq('id',1);
     if(error) throw error;
+
+    // Discord automatisch synchronisieren
+const {error:syncError}=await supabaseClient.functions.invoke('discord-sync');
+
+if(syncError){
+  console.error('Discord-Sync fehlgeschlagen:', syncError);
+  alert('Streamplan gespeichert, aber Discord konnte nicht aktualisiert werden: '+syncError.message);
+}
+
     return true;
   } catch(err) { alert('Speichern fehlgeschlagen: '+(err.message||'Unbekannter Fehler')); return false; }
   finally { saving=false; }
