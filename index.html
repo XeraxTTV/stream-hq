@@ -53,7 +53,7 @@ async function save(){
     if(error) throw error;
 
     // Discord automatisch synchronisieren
-const {error:syncError}=await supabaseClient.functions.invoke('discord-sync');
+const {error:syncError}=await supabaseClient.functions.invoke('quick-function');
 
 if(syncError){
   console.error('Discord-Sync fehlgeschlagen:', syncError);
